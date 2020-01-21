@@ -64,6 +64,17 @@ export default class UserActivityMonitor extends EventEmitter {
         console.log('Error getting system idle time:', err);
       }
     }, this.config.updateFrequencyMs);
+
+    // Synchronise user presence from OS to MM backend
+    if (process.platform === 'win32' || process.platform === 'darwin') {
+      electron.powerMonitor.on('lock-screen', () => {
+        this.setActivityState(false, true);
+      });
+
+      electron.powerMonitor.on('unlock-screen', () => {
+        this.setActivityState(true, true);
+      });
+    }
   }
 
   /**
